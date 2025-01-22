@@ -1,4 +1,5 @@
-const baseUrl = "http://192.168.1.2:3000/";
+// const baseUrl = "http://192.168.1.2:3000/";
+const baseUrl = "https://player-app-webservice.onrender.com/";
 
 const addPlayerUrl = baseUrl + "home/players/add_player";
 

@@ -19,6 +19,7 @@ class _PlayersScreenState extends State<PlayersScreen> {
   List<PlayerDetails> _searchList = [];
   TextEditingController _searchController = TextEditingController();
 
+  var _isLoading = true;
   @override
   void initState() {
     super.initState();
@@ -47,6 +48,7 @@ class _PlayersScreenState extends State<PlayersScreen> {
     setState(() {
       _player = _loadedItems;
       _searchList = _loadedItems;
+      _isLoading = false;
     });
   }
 
@@ -123,58 +125,65 @@ class _PlayersScreenState extends State<PlayersScreen> {
                   labelText: 'Search',
                   prefixIcon: Icon(Icons.search),
                 ),
+                style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                    color: Theme.of(context).colorScheme.onSecondaryContainer),
               ),
             ),
             const SizedBox(
               height: 20,
             ),
             Expanded(
-              child: _searchList.isEmpty
-                  ? Center(
-                      child: Text(
-                        'No player found',
-                        style: Theme.of(context)
-                            .textTheme
-                            .titleLarge!
-                            .copyWith(
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .onSecondaryContainer),
-                      ),
+              child: _isLoading
+                  ? const Center(
+                      child: CircularProgressIndicator(),
                     )
-                  : ListView.builder(
-                      itemCount: _searchList.length,
-                      itemBuilder: (ctx, index) {
-                        return Card(
-                          margin: EdgeInsets.symmetric(
-                              vertical: 10, horizontal: 15),
-                          child: ListTile(
-                            leading: CircleAvatar(
-                              child: Text(_searchList[index].born),
-                            ),
-                            title: Text(_searchList[index].name),
-                            subtitle: Text('Age: ${_searchList[index].age}'),
-                            trailing: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                IconButton(
-                                  icon: Icon(Icons.edit),
-                                  onPressed: () {
-                                    _editPlayer(_searchList[index]);
-                                  },
-                                ),
-                                IconButton(
-                                  icon: Icon(Icons.delete),
-                                  onPressed: () {
-                                    _deletePlayer(_searchList[index].id);
-                                  },
-                                ),
-                              ],
-                            ),
+                  : _searchList.isEmpty
+                      ? Center(
+                          child: Text(
+                            'No player found',
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleLarge!
+                                .copyWith(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onSecondaryContainer),
                           ),
-                        );
-                      },
-                    ),
+                        )
+                      : ListView.builder(
+                          itemCount: _searchList.length,
+                          itemBuilder: (ctx, index) {
+                            return Card(
+                              margin: EdgeInsets.symmetric(
+                                  vertical: 10, horizontal: 15),
+                              child: ListTile(
+                                leading: CircleAvatar(
+                                  child: Text(_searchList[index].born),
+                                ),
+                                title: Text(_searchList[index].name),
+                                subtitle:
+                                    Text('Age: ${_searchList[index].age}'),
+                                trailing: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    IconButton(
+                                      icon: Icon(Icons.edit),
+                                      onPressed: () {
+                                        _editPlayer(_searchList[index]);
+                                      },
+                                    ),
+                                    IconButton(
+                                      icon: Icon(Icons.delete),
+                                      onPressed: () {
+                                        _deletePlayer(_searchList[index].id);
+                                      },
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
+                        ),
             ),
           ],
         ),

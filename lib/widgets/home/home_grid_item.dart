@@ -31,8 +31,7 @@ class HomeGridItem extends StatelessWidget {
           borderRadius: BorderRadius.circular(15),
         ),
         child: Text(
-            textAlign: TextAlign.center,
-            
+          textAlign: TextAlign.center,
           category.title,
           style: Theme.of(context).textTheme.titleLarge!.copyWith(
                 color: Theme.of(context).colorScheme.onSurface,

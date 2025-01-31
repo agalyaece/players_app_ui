@@ -44,7 +44,7 @@ class _PlayersScreenState extends State<PlayersScreen> {
 
     final List<PlayerDetails> _loadedItems =
         extractedData.map((item) => PlayerDetails.fromJson(item)).toList();
-    print(extractedData);
+    
     setState(() {
       _player = _loadedItems;
       _searchList = _loadedItems;

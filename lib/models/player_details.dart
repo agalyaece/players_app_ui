@@ -7,16 +7,18 @@ class PlayerDetails {
     this.teams = const [],
   });
 
-final String id;
+  final String id;
   final String name;
   final int age;
   final String born;
   final List<String> teams;
 
-  factory PlayerDetails.fromJson(Map<String, dynamic> json){
-    return PlayerDetails(id: json["_id"] ?? '', 
-    name: json["name"] ?? '' ,
-     age: json["age"] ?? 0,
-      born:json ["born"] ?? '',);
+  factory PlayerDetails.fromJson(Map<String, dynamic> json) {
+    return PlayerDetails(
+      id: json["_id"] ?? '',
+      name: json["name"] ?? '',
+      age: json["age"] ?? 0,
+      born: json["born"] ?? '',
+    );
   }
 }

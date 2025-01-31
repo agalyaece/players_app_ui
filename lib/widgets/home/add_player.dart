@@ -74,7 +74,7 @@ class _AddPlayerState extends State<AddPlayer> {
           },
         );
       } else {
-        // Handle error
+        
         setState(() {
           _isSending = false;
         });

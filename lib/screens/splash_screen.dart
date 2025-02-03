@@ -43,7 +43,9 @@ class _SplashScreenState extends State<SplashScreen>
             ),
             Text(
               'Loading...',
-              style: Theme.of(context).textTheme.titleMedium,
+              style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
             ),
           ],
         ),

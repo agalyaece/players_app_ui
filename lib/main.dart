@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:players_app/screens/tabs.dart';
+import 'package:players_app/screens/splash_screen.dart';
+// import 'package:players_app/screens/tabs.dart';
 
 final theme = ThemeData(
   colorScheme: ColorScheme.fromSeed(
@@ -24,7 +25,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Cricketers App',
       theme: theme,
-      home: const TabsScreen(),
+      home: const SplashScreen(),
     );
   }
 }

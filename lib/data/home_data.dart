@@ -12,11 +12,11 @@ const availableCategories = [
     title: "Teams",
     color:Color.fromARGB(255, 17, 93, 96),
   ),
-  // HomeCategory(
-  //   id: "c3",
-  //   title: "Tournaments",
-  //   color: Color.fromARGB(255, 17, 93, 96),
-  // ),
+  HomeCategory(
+    id: "c3",
+    title: "Tournaments",
+    color: Color.fromARGB(255, 17, 93, 96),
+  ),
   // HomeCategory(
   //   id: "c4",
   //   title: "Matches",

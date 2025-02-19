@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:players_app/backend_config/config.dart';
 import 'package:players_app/models/team_details.dart';
+import 'package:players_app/services/fetch_teams.dart';
 import 'package:players_app/widgets/home/add_team.dart';
 import 'package:players_app/widgets/home/edit_team.dart';
 
@@ -20,7 +21,7 @@ class _TeamsScreenState extends State<TeamsScreen> {
   @override
   void initState() {
     super.initState();
-    _fetchTeams();
+    _loadTeams();
   }
 
   void _addNewTeam() async {
@@ -30,32 +31,23 @@ class _TeamsScreenState extends State<TeamsScreen> {
     if (newTeam == null) {
       return;
     }
-    _fetchTeams();
+    _loadTeams();
     setState(() {
       _team.add(newTeam);
     });
   }
 
-  Future<void> _fetchTeams() async {
+ 
+
+  Future<void> _loadTeams() async {
     try {
-      final url = Uri.parse(getTeamsUrl);
-      final response = await http.get(url);
-
-      if (response.statusCode != 201) {
-        throw Exception('Failed to load teams');
-      }
-      final List<dynamic> extractedData = json.decode(response.body);
-
-      final List<TeamDetails> _loadedItems =
-          extractedData.map((item) => TeamDetails.fromJson(item)).toList();
+      final teams = await fetchTeams();
       setState(() {
-        _team = _loadedItems;
+        _team = teams;
         _isLoading = false;
       });
     } catch (error) {
-      setState(() {
-        _isLoading = false;
-      });
+      print('Error loading teams: $error');
     }
   }
 
@@ -75,7 +67,7 @@ class _TeamsScreenState extends State<TeamsScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Team deleted successfully')),
       );
-      _fetchTeams();
+      _loadTeams();
     } catch (error) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Failed to delete team')),
@@ -83,7 +75,7 @@ class _TeamsScreenState extends State<TeamsScreen> {
     }
   }
 
-void _editTeam(TeamDetails team) async {
+  void _editTeam(TeamDetails team) async {
     final updatedTeam = await Navigator.of(context).push(
       MaterialPageRoute(
         builder: (ctx) => EditTeam(
@@ -157,7 +149,7 @@ void _editTeam(TeamDetails team) async {
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
                                 children: [
-                                  Text(team.name),
+                                  Text(team.teamName),
                                   Row(
                                     children: [
                                       IconButton(
@@ -178,7 +170,7 @@ void _editTeam(TeamDetails team) async {
                               ),
                               children: team.players.map((player) {
                                 return ListTile(
-                                  title: Text(player),
+                                  title: Text(player.name),
                                 );
                               }).toList(),
                             );

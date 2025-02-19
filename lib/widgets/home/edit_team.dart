@@ -21,35 +21,42 @@ class EditTeam extends StatefulWidget {
 
 class _EditTeamState extends State<EditTeam> {
   final _formKey = GlobalKey<FormState>();
-  String? _enteredName;
+  String? _enteredTeamName;
   String? _enteredCategory;
   var _isSending = false;
-  List<String>? _selectedPlayers;
+  List<PlayerDetails>? _selectedPlayers;
   List<PlayerDetails> _availablePlayers = [];
 
   @override
   void initState() {
     super.initState();
-    _enteredName = widget.data.name;
+    _enteredTeamName = widget.data.teamName;
     _enteredCategory = widget.data.category;
-    _selectedPlayers = widget.data.players;
+    _selectedPlayers = widget.data.players.cast<PlayerDetails>();
     _fetchPlayers();
   }
 
-  Future<List<PlayerDetails>> _fetchPlayers() async {
+Future<List<PlayerDetails>> _fetchPlayers() async {
     final url = Uri.parse(getPlayersUrl);
-    final response = await http.get(url);
-    if (response.statusCode == 201) {
-      final List<dynamic> extractedData = json.decode(response.body);
-      final List<PlayerDetails> loadedPlayers =
-          extractedData.map((item) => PlayerDetails.fromJson(item)).toList();
-      _availablePlayers = loadedPlayers;
-      return loadedPlayers
-          .where((player) => _selectedPlayers!.contains(player))
-          .toList();
-    } else {
-      throw Exception('Failed to load players');
+    try {
+      final response = await http.get(url);
+      if (response.statusCode == 200) {
+        final List<dynamic> extractedData = json.decode(response.body);
+        final List<PlayerDetails> loadedPlayers =
+            extractedData.map((item) => PlayerDetails.fromJson(item)).toList();
+        setState(() {
+          _availablePlayers = loadedPlayers;
+        });
+      } else {
+        throw Exception('Failed to load players: ${response.statusCode}');
+      }
+    } catch (error) {
+      setState(() {
+        _availablePlayers = [];
+      });
+      throw Exception('Failed to load players: $error');
     }
+    return _availablePlayers;
   }
 
   void _updateTeam() async {
@@ -69,8 +76,11 @@ class _EditTeamState extends State<EditTeam> {
       },
       body: jsonEncode({
         "category": _enteredCategory,
-        "name": _enteredName,
-        "players": _selectedPlayers,
+        "name": _enteredTeamName,
+        "players": _selectedPlayers!.map((player) => {
+            "player_name": player.name,
+            "player_team": _enteredTeamName,
+          }).toList(),
       }),
     );
     if (response.statusCode == 200 || response.statusCode == 201) {
@@ -83,9 +93,9 @@ class _EditTeamState extends State<EditTeam> {
       );
       widget.onUpdate(TeamDetails(
         id: widget.data.id,
-        name: _enteredName!,
+        teamName: _enteredTeamName!,
         category: _enteredCategory!,
-        players: _selectedPlayers!.map((player) => player).toList(),
+        players: _selectedPlayers!.map((player) => Player.fromDetails(player)).toList(),
       ));
       _fetchPlayers();
       Navigator.of(context).pop();
@@ -133,7 +143,7 @@ class _EditTeamState extends State<EditTeam> {
                   ),
                   TextFormField(
                     decoration: InputDecoration(labelText: 'Team Name'),
-                    initialValue: _enteredName,
+                    initialValue: _enteredTeamName,
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return 'Enter valid characters';
@@ -141,7 +151,7 @@ class _EditTeamState extends State<EditTeam> {
                       return null;
                     },
                     onSaved: (value) {
-                      _enteredName = value!;
+                      _enteredTeamName = value!;
                     },
                     style: Theme.of(context).textTheme.titleMedium!.copyWith(
                         color:
@@ -182,7 +192,7 @@ class _EditTeamState extends State<EditTeam> {
                                 setState(() {
                                   if (value != null &&
                                       !_selectedPlayers!.contains(value.name)) {
-                                    _selectedPlayers!.add(value.name);
+                                    _selectedPlayers!.add(value);
                                   }
                                 });
                               },
@@ -192,7 +202,7 @@ class _EditTeamState extends State<EditTeam> {
                               spacing: 8.0,
                               children: _selectedPlayers!.map((player) {
                                 return Chip(
-                                  label: Text(player),
+                                  label: Text(player.name),
                                   onDeleted: () {
                                     setState(() {
                                       _selectedPlayers!.remove(player);
@@ -219,9 +229,9 @@ class _EditTeamState extends State<EditTeam> {
                               : () {
                                   _formKey.currentState!.reset();
                                   setState(() {
-                                    _selectedPlayers = widget.data.players;
+                                    _selectedPlayers = widget.data.players.cast<PlayerDetails>();
                                     _enteredCategory = widget.data.category;
-                                    _enteredName = widget.data.name;
+                                    _enteredTeamName = widget.data.teamName;
                                   });
                                 },
                           child: const Text("Reset")),

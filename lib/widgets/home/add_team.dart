@@ -19,10 +19,10 @@ class AddTeam extends StatefulWidget {
 
 class _AddTeamState extends State<AddTeam> {
   final _formKey = GlobalKey<FormState>();
-  var _enteredName = "";
+  var _enteredTeamName = "";
   var _enteredCategory = "";
   var _isSending = false;
-  List<String> _selectedPlayers = [];
+  List<PlayerDetails> _selectedPlayers = [];
 
   Future<List<PlayerDetails>> _fetchPlayers() async {
     final url = Uri.parse(getPlayersUrl);
@@ -51,8 +51,11 @@ class _AddTeamState extends State<AddTeam> {
         },
         body: jsonEncode({
           "category": _enteredCategory,
-          "name": _enteredName,
-          "players": _selectedPlayers,
+          "team_name": _enteredTeamName,
+          "players": _selectedPlayers.map((player) => {
+            "player_name": player.name,
+            "player_team": _enteredTeamName,
+          }).toList(),
         }),
       );
 
@@ -152,7 +155,7 @@ class _AddTeamState extends State<AddTeam> {
                     return null;
                   },
                   onSaved: (value) {
-                    _enteredName = value!;
+                    _enteredTeamName = value!;
                   },
                   style: Theme.of(context).textTheme.titleMedium!.copyWith(
                       color:
@@ -193,7 +196,7 @@ class _AddTeamState extends State<AddTeam> {
                               setState(() {
                                 if (value != null &&
                                     !_selectedPlayers.contains(value)) {
-                                  _selectedPlayers.add(value.name);
+                                  _selectedPlayers.add(value);
                                   players.remove(value);
                                 }
                               });
@@ -204,12 +207,11 @@ class _AddTeamState extends State<AddTeam> {
                             spacing: 8.0,
                             children: _selectedPlayers.map((player) {
                               return Chip(
-                                label: Text(player),
+                                label: Text(player.name),
                                 onDeleted: () {
                                   setState(() {
                                     _selectedPlayers.remove(player);
-                                    players.add(players
-                                        .firstWhere((p) => p.name == player));
+                                    players.add(player);
                                   });
                                 },
                               );

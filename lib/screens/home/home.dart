@@ -3,6 +3,7 @@ import 'package:players_app/data/home_data.dart';
 import 'package:players_app/models/home_category.dart';
 import 'package:players_app/screens/home/players.dart';
 import 'package:players_app/screens/home/teams.dart';
+import 'package:players_app/screens/home/tournament.dart';
 import 'package:players_app/widgets/home/home_grid_item.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -17,6 +18,10 @@ class HomeScreen extends StatelessWidget {
       Navigator.of(context)
           .push(MaterialPageRoute(builder: (ctx) => TeamsScreen()));
     }
+    if (category.id == "c3") {
+      Navigator.of(context)
+          .push(MaterialPageRoute(builder: (ctx) => TournamentScreen()));
+    }
   }
 
   @override
@@ -27,7 +32,7 @@ class HomeScreen extends StatelessWidget {
           padding: const EdgeInsets.all(24),
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 1,
-              childAspectRatio: 11/2,
+              childAspectRatio: 11 / 2,
               crossAxisSpacing: 20,
               mainAxisSpacing: 20),
           children: [

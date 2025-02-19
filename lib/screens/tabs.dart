@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:players_app/screens/fantasy/fantasy.dart';
 import 'package:players_app/screens/home/home.dart';
-import 'package:players_app/widgets/fantasy/fantasy.dart';
+import 'package:players_app/screens/matches/matches.dart';
 
 class TabsScreen extends StatefulWidget {
   const TabsScreen({super.key});
@@ -22,10 +23,16 @@ class _TabsScreenState extends State<TabsScreen> {
   @override
   Widget build(BuildContext context) {
     Widget activePage = const HomeScreen();
-    const activePageTitle = "Home";
+    var activePageTitle = "Home";
 
     if (_selectedPageIndex == 1) {
-      activePage = const Fantasy();
+      activePageTitle = "Matches";
+      activePage = const MatchesScreen();
+    }
+
+    if (_selectedPageIndex == 2) {
+      activePageTitle = "Fantasy Teams";
+      activePage = const FantasyScreen();
     }
 
     return Scaffold(
@@ -37,8 +44,17 @@ class _TabsScreenState extends State<TabsScreen> {
       bottomNavigationBar: BottomNavigationBar(
         items: const [
           BottomNavigationBarItem(
-              icon: Icon(Icons.home_rounded), label: "Home"),
-          BottomNavigationBarItem(icon: Icon(Icons.people), label: "Fantasy"),
+            icon: Icon(Icons.home_rounded),
+            label: "Home",
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.sports_cricket_rounded),
+            label: "Matches",
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.people),
+            label: "Fantasy",
+          ),
         ],
         onTap: _selectedPage,
         currentIndex: _selectedPageIndex,

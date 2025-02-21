@@ -7,6 +7,7 @@ import 'package:players_app/models/tournament_details.dart';
 import 'package:players_app/services/fetch_tournaments.dart';
 import 'package:players_app/widgets/home/add_tournament.dart';
 import 'package:players_app/widgets/home/edit_tournament.dart';
+import 'package:players_app/widgets/matches/add_matches.dart';
 
 class TournamentScreen extends StatefulWidget {
   const TournamentScreen({super.key});
@@ -123,6 +124,13 @@ class _TournamentScreenState extends State<TournamentScreen> {
                         trailing: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
+                            IconButton(
+                                icon: Icon(Icons.add),
+                                tooltip: 'Add Matches',
+                                onPressed: () {
+                                  Navigator.of(context).push(MaterialPageRoute(
+                                      builder: (ctx) => const AddMatches()));
+                                }),
                             IconButton(
                               icon: Icon(Icons.edit),
                               onPressed: () {

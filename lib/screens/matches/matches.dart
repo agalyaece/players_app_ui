@@ -24,6 +24,11 @@ class _MatchesScreenState extends State<MatchesScreen> {
   void initState() {
     super.initState();
     _loadMatches();
+    setState(() {
+      _matches.sort((a, b) => a.matchDate
+          .toIso8601String()
+          .compareTo(b.matchDate.toIso8601String()));
+    });
   }
 
   Future<void> _loadMatches() async {
@@ -31,6 +36,9 @@ class _MatchesScreenState extends State<MatchesScreen> {
       final matches = await fetchMatches();
       setState(() {
         _matches = matches;
+        _matches.sort((a, b) => a.matchDate
+          .toIso8601String()
+          .compareTo(b.matchDate.toIso8601String()));
         _isLoading = false;
       });
     } catch (error) {

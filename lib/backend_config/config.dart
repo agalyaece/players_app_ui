@@ -43,6 +43,10 @@ String updateMatchUrl(String id) {
   return baseUrl + "matches/edit_matches/" + id;
 }
 
+String addPlayerToMatchUrl(String teamA, String teamB) {
+  return baseUrl + "matches/get_players/" + teamA + "/" + teamB;
+}
+
 String addFantasyUrl(String teamA, String teamB) {
   return baseUrl + "fantasy/get_players/" + teamA + "/" + teamB;
 }

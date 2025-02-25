@@ -5,6 +5,7 @@ import 'dart:convert';
 import 'package:players_app/models/match_details.dart';
 import 'package:players_app/services/fetch_matches.dart';
 import 'package:players_app/widgets/matches/add_matches.dart';
+import 'package:players_app/widgets/matches/add_players.dart';
 import 'package:players_app/widgets/matches/edit_matches.dart';
 
 class MatchesScreen extends StatefulWidget {
@@ -37,8 +38,8 @@ class _MatchesScreenState extends State<MatchesScreen> {
       setState(() {
         _matches = matches;
         _matches.sort((a, b) => a.matchDate
-          .toIso8601String()
-          .compareTo(b.matchDate.toIso8601String()));
+            .toIso8601String()
+            .compareTo(b.matchDate.toIso8601String()));
         _isLoading = false;
       });
     } catch (error) {
@@ -267,6 +268,19 @@ class _MatchesScreenState extends State<MatchesScreen> {
                             ],
                           ),
                         ),
+                        onTap: () {
+                          Navigator.of(context).push(MaterialPageRoute(
+                            builder: (ctx) => AddPlayers(
+                              teamA: _matches[index].teamA,
+                              teamB: _matches[index].teamB,
+                              tournamentName: _matches[index].tournamentName,
+                              matchDate: _matches[index]
+                                  .matchDate
+                                  .toString()
+                                  .split(" ")[0],
+                            ),
+                          ));
+                        },
                       ),
                     );
                   },

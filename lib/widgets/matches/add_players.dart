@@ -24,6 +24,7 @@ class AddPlayers extends StatefulWidget {
 
 class _AddPlayersState extends State<AddPlayers> {
   bool _isLoading = false;
+  bool _isSending = false;
   String? _error;
   List<dynamic> _teamAPlayers = [];
   List<dynamic> _teamBPlayers = [];
@@ -45,7 +46,7 @@ class _AddPlayersState extends State<AddPlayers> {
 
     try {
       final response = await http
-          .get(Uri.parse(addPlayerToMatchUrl(widget.teamA, widget.teamB)));
+          .get(Uri.parse(getPlayersForMatchUrl(widget.teamA, widget.teamB)));
       if (response.statusCode == 201) {
         final responseBody = json.decode(response.body);
         // print('Response Body: $responseBody');
@@ -93,6 +94,101 @@ class _AddPlayersState extends State<AddPlayers> {
     });
   }
 
+  Future<void> _addPlayers() async {
+    setState(() {
+      _isSending = true;
+    });
+
+    try {
+      final response = await http.post(
+        Uri.parse(addPlayerToMatchUrl),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: json.encode({
+          'team_A': widget.teamA,
+          'team_B': widget.teamB,
+          'tournament_name': widget.tournamentName,
+          'match_date': widget.matchDate,
+          'players_team_A': _selectedPlayersTeamA
+              .map((player) => {
+                    "player_name": player['player_name'],
+                    "player_team": widget.teamA,
+                  })
+              .toList(),
+          'players_team_B': _selectedPlayersTeamB
+              .map((player) => {
+                    "player_name": player['player_name'],
+                    "player_team": widget.teamB,
+                  })
+              .toList(),
+        }),
+      );
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final newItem = json.decode(response.body);
+
+        if (!context.mounted) {
+          return;
+        }
+        setState(() {
+          _isSending = false;
+        });
+
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title:
+                  const Text("Success", style: TextStyle(color: Colors.green)),
+              content: Text(
+                  json.decode(response.body)['message'] ??
+                      "The addition was Successful",
+                  style: TextStyle(color: Colors.white)),
+              actions: [
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                    Navigator.pop(context, newItem);
+                  },
+                  child: const Text("OK"),
+                ),
+              ],
+            );
+          },
+        );
+      } else {
+        setState(() {
+          _isSending = false;
+        });
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: const Text("Error", style: TextStyle(color: Colors.red)),
+              content: Text(
+                  json.decode(response.body)['message'] ??
+                      "Failed to add player. Please try again.",
+                  style: TextStyle(color: Colors.white)),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: const Text("OK"),
+                ),
+              ],
+            );
+          },
+        );
+      }
+    } catch (error) {
+      setState(() {
+        _error = error.toString();
+        _isLoading = false;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -138,37 +234,54 @@ class _AddPlayersState extends State<AddPlayers> {
                         ),
                       ),
                       Expanded(
-                        child: ListView.builder(
-                          itemCount: _teamAPlayers.length,
-                          itemBuilder: (ctx, index) {
-                            return _isLoading
-                                ? const Center(
-                                    child: CircularProgressIndicator())
-                                : Card(
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .secondaryContainer,
-                                    margin: EdgeInsets.symmetric(
-                                        vertical: 4, horizontal: 9),
-                                    child: ListTile(
-                                      leading: Checkbox(
-                                        value: _selectedPlayersTeamA
-                                            .contains(_teamAPlayers[index]),
-                                        onChanged: (bool? value) {
-                                          _togglePlayerSelection(
-                                              _teamAPlayers[index]);
-                                        },
-                                      ),
-                                      title: Text(
-                                          '${_teamAPlayers[index]['player_name']}  '),
-                                      onTap: () {
-                                        _togglePlayerSelection(
-                                            _teamAPlayers[index]);
-                                      },
+                        child: _isLoading
+                            ? const Center(child: CircularProgressIndicator())
+                            : _teamAPlayers.isEmpty
+                                ? Center(
+                                    child: Text(
+                                      "No Players found! Try adding new",
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .titleMedium!
+                                          .copyWith(
+                                              color: Theme.of(context)
+                                                  .colorScheme
+                                                  .onSecondaryContainer),
                                     ),
-                                  );
-                          },
-                        ),
+                                  )
+                                : ListView.builder(
+                                    itemCount: _teamAPlayers.length,
+                                    itemBuilder: (ctx, index) {
+                                      return _isLoading
+                                          ? const Center(
+                                              child:
+                                                  CircularProgressIndicator())
+                                          : Card(
+                                              color: Theme.of(context)
+                                                  .colorScheme
+                                                  .secondaryContainer,
+                                              margin: EdgeInsets.symmetric(
+                                                  vertical: 4, horizontal: 9),
+                                              child: ListTile(
+                                                leading: Checkbox(
+                                                  value: _selectedPlayersTeamA
+                                                      .contains(
+                                                          _teamAPlayers[index]),
+                                                  onChanged: (bool? value) {
+                                                    _togglePlayerSelection(
+                                                        _teamAPlayers[index]);
+                                                  },
+                                                ),
+                                                title: Text(
+                                                    '${_teamAPlayers[index]['player_name']}  '),
+                                                onTap: () {
+                                                  _togglePlayerSelection(
+                                                      _teamAPlayers[index]);
+                                                },
+                                              ),
+                                            );
+                                    },
+                                  ),
                       ),
                     ],
                   ),
@@ -206,7 +319,22 @@ class _AddPlayersState extends State<AddPlayers> {
                         ),
                       ),
                       Expanded(
-                        child: ListView.builder(
+                        child: _isLoading
+                            ? const Center(child: CircularProgressIndicator())
+                            : _teamBPlayers.isEmpty
+                                ? Center(
+                                    child: Text(
+                                      "No Players found! Try adding new",
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .titleMedium!
+                                          .copyWith(
+                                              color: Theme.of(context)
+                                                  .colorScheme
+                                                  .onSecondaryContainer),
+                                    ),
+                                  )
+                                : ListView.builder(
                           itemCount: _teamBPlayers.length,
                           itemBuilder: (ctx, index) {
                             return _isLoading
@@ -245,6 +373,14 @@ class _AddPlayersState extends State<AddPlayers> {
             ),
           ),
         ],
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: (_selectedPlayersTeamA.length == _maxTotalPlayers &&
+                _selectedPlayersTeamB.length == _maxTotalPlayers)
+            ? _addPlayers
+            : null,
+        label: Text('Add Players to Match'),
+        icon: Icon(Icons.add),
       ),
     );
   }

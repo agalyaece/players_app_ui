@@ -130,7 +130,11 @@ class _FantasyScreenState extends State<FantasyScreen> {
                           builder: (ctx) => Fantasy(
                             teamA: _matches[index].teamA,
                             teamB: _matches[index].teamB,
-                            tournamentName: _matches[index].tournamentName
+                            tournamentName: _matches[index].tournamentName,
+                            matchDate: _matches[index]
+                                  .matchDate
+                                  .toString()
+                                  .split(" ")[0],
                           )));
                         },
                       ),

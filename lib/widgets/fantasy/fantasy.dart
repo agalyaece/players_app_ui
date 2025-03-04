@@ -7,11 +7,15 @@ class Fantasy extends StatefulWidget {
   final String teamA;
   final String teamB;
   final String tournamentName;
-  const Fantasy(
-      {super.key,
-      required this.tournamentName,
-      required this.teamA,
-      required this.teamB});
+  final String matchDate;
+
+  const Fantasy({
+    super.key,
+    required this.tournamentName,
+    required this.teamA,
+    required this.teamB,
+    required this.matchDate,
+  });
 
   @override
   State<Fantasy> createState() {
@@ -40,21 +44,21 @@ class _FantasyState extends State<Fantasy> {
     });
 
     try {
-      final response =
-          await http.get(Uri.parse(addFantasyUrl(widget.teamA, widget.teamB)));
+      final response = await http.get(Uri.parse(addFantasyUrl(widget.teamA,
+          widget.teamB, widget.tournamentName, widget.matchDate)));
       if (response.statusCode == 201) {
         final responseBody = json.decode(response.body);
         // print('Response Body: $responseBody');
         final List<dynamic> players = responseBody;
         setState(() {
           _teamAPlayers = players
-              .where((team) => team['team_name'] == widget.teamA)
-              .expand((team) => team['players'])
+              .where((team) => team['team_A'] == widget.teamA)
+              .expand((team) => team['players_team_A'])
               .toList();
 
           _teamBPlayers = players
-              .where((team) => team['team_name'] == widget.teamB)
-              .expand((team) => team['players'])
+              .where((team) => team['team_B'] == widget.teamB)
+              .expand((team) => team['players_team_B'])
               .toList();
           _isLoading = false;
         });
@@ -98,7 +102,8 @@ class _FantasyState extends State<Fantasy> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("${widget.teamA.toUpperCase()} vs ${widget.teamB.toUpperCase()}"),
+        title: Text(
+            "${widget.teamA.toUpperCase()} vs ${widget.teamB.toUpperCase()}"),
       ),
       body: Column(
         children: [
@@ -109,7 +114,6 @@ class _FantasyState extends State<Fantasy> {
               borderRadius: BorderRadius.circular(9.0),
               color: Theme.of(context).colorScheme.secondary,
             ),
-            
             child: Text(
               'Selected Players: ${_selectedPlayers.length}/$_maxTotalPlayers',
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
@@ -138,35 +142,54 @@ class _FantasyState extends State<Fantasy> {
                         ),
                       ),
                       Expanded(
-                        child: ListView.builder(
-                          itemCount: _teamAPlayers.length,
-                          itemBuilder: (ctx, index) {
-                            return _isLoading
-                                ? const Center(
-                                    child: CircularProgressIndicator())
-                                : Card(
-                                    color: Theme.of(context).colorScheme.secondaryContainer,
-                                    margin: EdgeInsets.symmetric(
-                                        vertical: 4, horizontal: 9),
-                                    child: ListTile(
-                                      leading: Checkbox(
-                                        value: _selectedPlayers
-                                            .contains(_teamAPlayers[index]),
-                                        onChanged: (bool? value) {
-                                          _togglePlayerSelection(
-                                              _teamAPlayers[index]);
-                                        },
-                                      ),
-                                      title: Text(
-                                          '${_teamAPlayers[index]['player_name']}  '),
-                                      onTap: () {
-                                        _togglePlayerSelection(
-                                            _teamAPlayers[index]);
-                                      },
+                        child: _isLoading
+                            ? const Center(child: CircularProgressIndicator())
+                            : _teamAPlayers.isEmpty
+                                ? Center(
+                                    child: Text(
+                                      "No Players found! Try adding new",
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .titleMedium!
+                                          .copyWith(
+                                              color: Theme.of(context)
+                                                  .colorScheme
+                                                  .onSecondaryContainer),
                                     ),
-                                  );
-                          },
-                        ),
+                                  )
+                                : ListView.builder(
+                                    itemCount: _teamAPlayers.length,
+                                    itemBuilder: (ctx, index) {
+                                      return _isLoading
+                                          ? const Center(
+                                              child:
+                                                  CircularProgressIndicator())
+                                          : Card(
+                                              color: Theme.of(context)
+                                                  .colorScheme
+                                                  .secondaryContainer,
+                                              margin: EdgeInsets.symmetric(
+                                                  vertical: 4, horizontal: 9),
+                                              child: ListTile(
+                                                leading: Checkbox(
+                                                  value:
+                                                      _selectedPlayers.contains(
+                                                          _teamAPlayers[index]),
+                                                  onChanged: (bool? value) {
+                                                    _togglePlayerSelection(
+                                                        _teamAPlayers[index]);
+                                                  },
+                                                ),
+                                                title: Text(
+                                                    '${_teamAPlayers[index]['player_name']}  '),
+                                                onTap: () {
+                                                  _togglePlayerSelection(
+                                                      _teamAPlayers[index]);
+                                                },
+                                              ),
+                                            );
+                                    },
+                                  ),
                       ),
                     ],
                   ),
@@ -191,35 +214,54 @@ class _FantasyState extends State<Fantasy> {
                         ),
                       ),
                       Expanded(
-                        child: ListView.builder(
-                          itemCount: _teamBPlayers.length,
-                          itemBuilder: (ctx, index) {
-                            return _isLoading
-                                ? const Center(
-                                    child: CircularProgressIndicator())
-                                : Card(
-                                    color: Theme.of(context).colorScheme.secondaryContainer,
-                                    margin: EdgeInsets.symmetric(
-                                        vertical: 4, horizontal: 9),
-                                    child: ListTile(
-                                      leading: Checkbox(
-                                        value: _selectedPlayers
-                                            .contains(_teamBPlayers[index]),
-                                        onChanged: (bool? value) {
-                                          _togglePlayerSelection(
-                                              _teamBPlayers[index]);
-                                        },
-                                      ),
-                                      title: Text(
-                                          '${_teamBPlayers[index]['player_name']} '),
-                                      onTap: () {
-                                        _togglePlayerSelection(
-                                            _teamBPlayers[index]);
-                                      },
+                        child: _isLoading
+                            ? const Center(child: CircularProgressIndicator())
+                            : _teamBPlayers.isEmpty
+                                ? Center(
+                                    child: Text(
+                                      "No Players found! Try adding new",
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .titleMedium!
+                                          .copyWith(
+                                              color: Theme.of(context)
+                                                  .colorScheme
+                                                  .onSecondaryContainer),
                                     ),
-                                  );
-                          },
-                        ),
+                                  )
+                                : ListView.builder(
+                                    itemCount: _teamBPlayers.length,
+                                    itemBuilder: (ctx, index) {
+                                      return _isLoading
+                                          ? const Center(
+                                              child:
+                                                  CircularProgressIndicator())
+                                          : Card(
+                                              color: Theme.of(context)
+                                                  .colorScheme
+                                                  .secondaryContainer,
+                                              margin: EdgeInsets.symmetric(
+                                                  vertical: 4, horizontal: 9),
+                                              child: ListTile(
+                                                leading: Checkbox(
+                                                  value:
+                                                      _selectedPlayers.contains(
+                                                          _teamBPlayers[index]),
+                                                  onChanged: (bool? value) {
+                                                    _togglePlayerSelection(
+                                                        _teamBPlayers[index]);
+                                                  },
+                                                ),
+                                                title: Text(
+                                                    '${_teamBPlayers[index]['player_name']} '),
+                                                onTap: () {
+                                                  _togglePlayerSelection(
+                                                      _teamBPlayers[index]);
+                                                },
+                                              ),
+                                            );
+                                    },
+                                  ),
                       ),
                     ],
                   ),
